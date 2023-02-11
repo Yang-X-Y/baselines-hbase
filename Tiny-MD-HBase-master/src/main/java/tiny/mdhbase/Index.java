@@ -66,6 +66,8 @@ public class Index implements Closeable {
 
   private final int splitThreshold;
 
+  private int splitTimes;
+
   private final HTable dataTable;
 
   private final HTable indexTable;
@@ -104,6 +106,8 @@ public class Index implements Closeable {
     }
 
     this.splitThreshold = splitThreshold;
+
+    this.splitTimes = 0;
   }
 
   /**
@@ -184,6 +188,7 @@ public class Index implements Closeable {
 
   private void maySplit(byte[] bucketKey, long size) throws IOException {
     if (size > splitThreshold) {
+      splitTimes+=1;
       splitBucket(bucketKey);
     }
   }
@@ -213,7 +218,7 @@ public class Index implements Closeable {
     long newSize = 0L;
     for (Result result : results) {
       newSize += result.getFamilyMap(Bucket.FAMILY).size();
-      System.out.println(result.getFamilyMap(Bucket.FAMILY));
+//      System.out.println(result.getFamilyMap(Bucket.FAMILY));
     }
 
     Put put0 = new Put(newChildKey0);
@@ -229,6 +234,10 @@ public class Index implements Closeable {
     indexTable.put(puts);
     maySplit(newChildKey0, newSize);
     maySplit(newChildKey1, bucketSize - newSize);
+  }
+
+  public int getSplitTimes(){
+    return splitTimes;
   }
 
   /*

@@ -81,10 +81,10 @@ public class myClient implements Closeable {
           break;
         case "knnQuery":
           List<Point> points = client.generateQueryPointsByRecords(pointRecordFile);
-          for (Point point : points) {
-            Iterable<Point> knnResult = client.nearestNeighbor(point, numK);
+          for (Point queryPoint : points) {
+            Iterable<Point> knnResult = client.nearestNeighbor(queryPoint, numK);
             for (Point p : knnResult) {
-              System.out.println(p);
+              System.out.println(p.toString()+"\t distance:"+p.distanceFrom(queryPoint));
             }
           }
           break;
@@ -163,28 +163,25 @@ public class myClient implements Closeable {
     System.out.println("write data");
     long records = 0;
     long id = 0;
-    try {
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
-      String line;
-      while ((line = bufferedReader.readLine())!= null){
-        String[] strings = line.split("@");
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
+    String line;
+    while ((line = bufferedReader.readLine())!= null){
+      String[] strings = line.split("@");
 //        String id = strings[0];
-        String geomWKT = strings[1];
-        Coordinate coordinate = wktReader.read(geomWKT).getCoordinate();
+      String geomWKT = strings[1];
+      Coordinate coordinate = wktReader.read(geomWKT).getCoordinate();
 
-        int integerLng = (int) ((coordinate.x+180) * PRECISION);
-        int integerLat = (int) ((coordinate.y+90) * PRECISION);
-        id+=1;
-        Point p = new Point(id, integerLng, integerLat);
-        byte[] row = Utils.bitwiseZip(p.x, p.y);
-        Bucket bucket = index.fetchBucket(row);
-        bucket.insert(row, p);
-        if (++records % 1000000 == 0){
-          System.out.println("导入点数 ：" + records);
-        }
+      int integerLng = (int) ((coordinate.x+180) * PRECISION);
+      int integerLat = (int) ((coordinate.y+90) * PRECISION);
+      id+=1;
+      Point p = new Point(id, integerLng, integerLat);
+      byte[] row = Utils.bitwiseZip(p.x, p.y);
+      Bucket bucket = index.fetchBucket(row);
+      bucket.insert(row, p);
+      if (++records % 1000000 == 0){
+        System.out.println("导入点数 ：" + records);
+        System.out.println("桶分割次数 ：" + index.getSplitTimes());
       }
-    }catch (IOException e){
-      System.out.println(e.getMessage());
     }
     System.out.println("导入完成，点数 ：" + records);
     System.out.println("idCount ：" + id);
