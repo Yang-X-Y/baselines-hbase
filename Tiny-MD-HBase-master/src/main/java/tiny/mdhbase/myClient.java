@@ -21,6 +21,8 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.io.WKTReader;
 import scala.Tuple2;
@@ -177,13 +179,15 @@ public class myClient implements Closeable {
       Point p = new Point(id, integerLng, integerLat);
       byte[] row = Utils.bitwiseZip(p.x, p.y);
       Bucket bucket = index.fetchBucket(row);
-      bucket.insert(row, p);
-      if (++records % 1000000 == 0){
+      bucket.insertMain(row, p);
+      bucket.insertIndex(row, p);
+      if (++records % 100000 == 0){
         System.out.println("导入点数 ：" + records);
         System.out.println("桶分割次数 ：" + index.getSplitTimes());
       }
     }
     System.out.println("导入完成，点数 ：" + records);
+    System.out.println("桶分割次数 ：" + index.getSplitTimes());
     System.out.println("idCount ：" + id);
   }
 

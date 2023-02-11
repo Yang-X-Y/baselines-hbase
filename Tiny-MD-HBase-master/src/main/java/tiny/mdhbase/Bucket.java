@@ -74,10 +74,13 @@ public class Bucket {
     this.index = index;
   }
 
-  public void insert(byte[] row, Point p) throws IOException {
+  public void insertMain(byte[] row, Point p) throws IOException {
     Put put = new Put(row);
     put.add(FAMILY, toQualifier(p), toValue(p));
     dataTable.put(put);
+  }
+
+  public void insertIndex(byte[] row, Point p) throws IOException {
     index.notifyInsertion(row);
   }
 
@@ -110,8 +113,8 @@ public class Bucket {
    */
   public Collection<Point> scan(Range rx, Range ry) throws IOException {
     Scan scan = new Scan(startRow, stopRow);
-//    Filter filter = new RangeFilter(rx, ry);
-//    scan.setFilter(filter);
+    Filter filter = new RangeFilter(rx, ry);
+    scan.setFilter(filter);
     scan.setCaching(1000);
     ResultScanner scanner = dataTable.getScanner(scan);
     List<Point> results = new LinkedList<Point>();

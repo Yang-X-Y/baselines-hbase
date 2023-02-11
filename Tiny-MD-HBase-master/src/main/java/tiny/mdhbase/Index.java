@@ -181,15 +181,17 @@ public class Index implements Closeable {
   void notifyInsertion(byte[] row) throws IOException {
     Result bucketEntry = indexTable.getRowOrBefore(row, FAMILY_INFO);
     byte[] bucketKey = bucketEntry.getRow();
+    int prefixLength = Bytes.toInt(bucketEntry.getValue(FAMILY_INFO,
+            COLUMN_PREFIX_LENGTH));
     long size = indexTable.incrementColumnValue(bucketKey, FAMILY_INFO,
         COLUMN_BUCKET_SIZE, 1L);
-    maySplit(bucketKey, size);
+    maySplit(bucketKey,prefixLength, size);
   }
 
-  private void maySplit(byte[] bucketKey, long size) throws IOException {
+  private void maySplit(byte[] bucketKey,int prefixLength, long size) throws IOException {
     if (size > splitThreshold) {
       splitTimes+=1;
-      splitBucket(bucketKey);
+      splitBucket(bucketKey,prefixLength,size);
     }
   }
 
@@ -197,13 +199,13 @@ public class Index implements Closeable {
    * bucket [abc*****] is partitioned into bucket [abc0****] and bucket
    * [abc1****].
    */
-  private void splitBucket(byte[] splitKey) throws IOException {
-    Result bucketEntry = indexTable.getRowOrBefore(splitKey, FAMILY_INFO);
-    byte[] bucketKey = bucketEntry.getRow();
-    int prefixLength = Bytes.toInt(bucketEntry.getValue(FAMILY_INFO,
-        COLUMN_PREFIX_LENGTH));
-    long bucketSize = Bytes.toLong(bucketEntry.getValue(FAMILY_INFO,
-        COLUMN_BUCKET_SIZE));
+  private void splitBucket(byte[] bucketKey,int prefixLength,long bucketSize) throws IOException {
+//    Result bucketEntry = indexTable.getRowOrBefore(splitKey, FAMILY_INFO);
+//    byte[] bucketKey = bucketEntry.getRow();
+//    int prefixLength = Bytes.toInt(bucketEntry.getValue(FAMILY_INFO,
+//        COLUMN_PREFIX_LENGTH));
+//    long bucketSize = Bytes.toLong(bucketEntry.getValue(FAMILY_INFO,
+//        COLUMN_BUCKET_SIZE));
     int newPrefixLength = prefixLength + 1;
     if (newPrefixLength > 32 * 2) {
       return; // exceeds the maximum prefix length.
@@ -213,7 +215,7 @@ public class Index implements Closeable {
     byte[] newChildKey1 = Utils.makeBit(bucketKey, prefixLength);
     Scan scan = new Scan(newChildKey0, newChildKey1);
     scan.addFamily(Bucket.FAMILY);
-    scan.setCaching(1000);
+    scan.setCaching(10000);
     ResultScanner results = dataTable.getScanner(scan);
     long newSize = 0L;
     for (Result result : results) {
@@ -232,12 +234,16 @@ public class Index implements Closeable {
     puts.add(put0);
     puts.add(put1);
     indexTable.put(puts);
-    maySplit(newChildKey0, newSize);
-    maySplit(newChildKey1, bucketSize - newSize);
+    maySplit(newChildKey0,newPrefixLength, newSize);
+    maySplit(newChildKey1,newPrefixLength,(bucketSize - newSize));
   }
 
   public int getSplitTimes(){
     return splitTimes;
+  }
+
+  public HTable getDataTable(){
+    return dataTable;
   }
 
   /*
