@@ -60,29 +60,34 @@ public class myClient implements Closeable {
     String tableName = jsonConf.getString("tableName");
     String inputFile = jsonConf.getString("inputFile");// 导入数据
     int splitThreshold = jsonConf.getIntValue("splitThreshold");// 桶分割阈值
-    String recordFile = jsonConf.getString("recordFile");// 查询条件
+    String pointRecordFile = jsonConf.getString("pointRecordFile");// knn 查询条件
+    String rangeRecordFile = jsonConf.getString("rangeRecordFile");// range查询条件
     String operation = jsonConf.getString("operation");// 操作: loadData; range query; knn query
     int numK = jsonConf.getIntValue("numK");// knn的k值
 
     myClient client = new myClient(tableName, splitThreshold);
 
     try {
-      if (operation.equals("loadData")) {
-        client.loadData(inputFile);
-      } else if (operation.equals("rangeQuery")) {
-        List<Tuple2<Range, Range>> queryRanges = client.generateQueryBoxByRecords(recordFile);
-        for (Tuple2<Range, Range> range:queryRanges) {
-          Iterable<Point> points = client.rangeQuery(range._1,range._2);
-          System.out.println(Iterables.size(points));
-        }
-      } else if (operation.equals("knnQuery")) {
-        List<Point> points = client.generateQueryPointsByRecords(recordFile);
-        for (Point point:points) {
-          Iterable<Point> knnResult = client.nearestNeighbor(point, numK);
-          for (Point p : knnResult) {
-            System.out.println(p);
+      switch (operation) {
+        case "loadData":
+          client.loadData(inputFile);
+          break;
+        case "rangeQuery":
+          List<Tuple2<Range, Range>> queryRanges = client.generateQueryBoxByRecords(rangeRecordFile);
+          for (Tuple2<Range, Range> range : queryRanges) {
+            Iterable<Point> points = client.rangeQuery(range._1, range._2);
+            System.out.println(Iterables.size(points));
           }
-        }
+          break;
+        case "knnQuery":
+          List<Point> points = client.generateQueryPointsByRecords(pointRecordFile);
+          for (Point point : points) {
+            Iterable<Point> knnResult = client.nearestNeighbor(point, numK);
+            for (Point p : knnResult) {
+              System.out.println(p);
+            }
+          }
+          break;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -102,10 +107,10 @@ public class myClient implements Closeable {
       while ((line = br.readLine()) != null) {
         JSONObject jsonObj = JSONObject.parseObject(line);
         if (jsonObj.containsKey("minLng")) {
-          int minLng = (int) (jsonObj.getDoubleValue("minLng")*PRECISION);
-          int minLat = (int) (jsonObj.getDoubleValue("minLat")*PRECISION);
-          int maxLng = (int) (jsonObj.getDoubleValue("maxLng")*PRECISION);
-          int maxLat = (int) (jsonObj.getDoubleValue("maxLat")*PRECISION);
+          int minLng = (int) ((jsonObj.getDoubleValue("minLng")+180)*PRECISION);
+          int minLat = (int) ((jsonObj.getDoubleValue("minLat")+90)*PRECISION);
+          int maxLng = (int) ((jsonObj.getDoubleValue("maxLng")+180)*PRECISION);
+          int maxLat = (int) ((jsonObj.getDoubleValue("maxLat")+90)*PRECISION);
           Range xRange = new Range(minLng, maxLng);
           Range yRange = new Range(minLat, maxLat);
           Tuple2<Range, Range> range = new Tuple2<Range,Range>(xRange,yRange);
@@ -135,8 +140,9 @@ public class myClient implements Closeable {
       while ((line = br.readLine()) != null) {
         JSONObject jsonObj = JSONObject.parseObject(line);
         if (jsonObj.containsKey("pointLng")) {
-          int pointLng = (int) (jsonObj.getDoubleValue("pointLng")*PRECISION);
-          int pointLat = (int) (jsonObj.getDoubleValue("pointLat")*PRECISION);
+          // MD HBase 只支持正数；
+          int pointLng = (int) ((jsonObj.getDoubleValue("pointLng")+180)*PRECISION);
+          int pointLat = (int) ((jsonObj.getDoubleValue("pointLat")+90)*PRECISION);
           queryPointId+=1;
           Point point = new Point(queryPointId, pointLng, pointLat);
           queryPoints.add(point);

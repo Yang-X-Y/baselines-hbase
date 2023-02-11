@@ -2,7 +2,8 @@
   "tableName": "MDHBasePoint",
   "inputFile": "/home/yxy/data/YellowTripData/yellowTrip2015/yellow_tripdata_2015-all.txt",
   "splitThreshold":150000,
-  "recordFile": "/home/yxy/gridMesa/records/yellowTrips/knn_10.txt",
+  "rangeRecordFile": "/home/yxy/gridMesa/records/yellowTrips/client_0.1.txt",
+  "pointRecordFile": "/home/yxy/gridMesa/records/yellowTrips/knn_10.txt",
   "operation":"loadData",
   "numK": 10
 }
