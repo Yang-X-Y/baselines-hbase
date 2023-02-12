@@ -182,12 +182,12 @@ public class myClient implements Closeable {
       bucket.insertMain(row, p);
       bucket.insertIndex(row, p);
       if (++records % 100000 == 0){
-        System.out.println("导入点数 ：" + records);
-        System.out.println("桶分割次数 ：" + index.getSplitTimes());
+        System.out.println("当前导入点数：" + records);
+        System.out.println("当前桶分割次数：" + index.getSplitTimes());
       }
     }
-    System.out.println("导入完成，点数 ：" + records);
-    System.out.println("桶分割次数 ：" + index.getSplitTimes());
+    System.out.println("导入完成,总点数 ：" + records);
+    System.out.println("桶分割总次数 ：" + index.getSplitTimes());
     System.out.println("idCount ：" + id);
   }
 
