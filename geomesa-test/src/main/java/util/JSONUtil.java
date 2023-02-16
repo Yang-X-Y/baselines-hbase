@@ -8,7 +8,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import java.io.*;
 
-public class JsonUtil {
+public class JSONUtil {
 
     /**
      * Read text file from local disk. Only for small file.

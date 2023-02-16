@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8d2f8536-6da2-4de3-94fa-0c9840465fcb" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../Tiny-MD-HBase-master/src/main/java/tiny/mdhbase/myClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Tiny-MD-HBase-master/src/main/java/tiny/mdhbase/myClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/baselines4sptialHBase.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/GeoMesaKNNQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/GeoMesaKNNQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/util/JsonUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/util/JSONUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +160,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../geowave-master" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../geowave-test" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Global Libraries" />
@@ -188,6 +190,19 @@
     <configuration name="test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="test" />
       <module name="geomesa-test" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -277,6 +292,10 @@
       <workItem from="1676121720559" duration="3110000" />
       <workItem from="1676125717984" duration="29000" />
       <workItem from="1676180705717" duration="3096000" />
+      <workItem from="1676263310394" duration="240000" />
+      <workItem from="1676263574425" duration="159000" />
+      <workItem from="1676267999603" duration="691000" />
+      <workItem from="1676284194652" duration="129000" />
     </task>
     <servers />
   </component>

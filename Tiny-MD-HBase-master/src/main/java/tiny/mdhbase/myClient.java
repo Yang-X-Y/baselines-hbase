@@ -42,7 +42,7 @@ public class myClient implements Closeable {
 
   private final Index index;
   private final WKTReader wktReader;
-  private final int PRECISION = 10000000;
+  private final int PRECISION = 1000000;
 
   public myClient(String tableName, int splitThreshold) throws IOException {
     this.wktReader = new WKTReader();
@@ -164,18 +164,15 @@ public class myClient implements Closeable {
 
     System.out.println("write data");
     long records = 0;
-    long id = 0;
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
     String line;
     while ((line = bufferedReader.readLine())!= null){
       String[] strings = line.split("@");
-//        String id = strings[0];
+      long id = Long.parseLong(strings[0]);
       String geomWKT = strings[1];
       Coordinate coordinate = wktReader.read(geomWKT).getCoordinate();
-
       int integerLng = (int) ((coordinate.x+180) * PRECISION);
       int integerLat = (int) ((coordinate.y+90) * PRECISION);
-      id+=1;
       Point p = new Point(id, integerLng, integerLat);
       byte[] row = Utils.bitwiseZip(p.x, p.y);
       Bucket bucket = index.fetchBucket(row);
@@ -188,7 +185,6 @@ public class myClient implements Closeable {
     }
     System.out.println("导入完成,总点数 ：" + records);
     System.out.println("桶分割总次数 ：" + index.getSplitTimes());
-    System.out.println("idCount ：" + id);
   }
 
   /**

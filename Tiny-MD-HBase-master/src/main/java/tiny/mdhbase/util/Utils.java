@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.util.Arrays;
+
 /**
  * @author shoji
  * 
@@ -179,5 +181,9 @@ public class Utils {
       buf.append("********");
     }
     return buf.toString();
+  }
+
+  public static void main(String[] args) {
+    System.out.println(Arrays.toString(Utils.bitwiseZip(360000000, 180000000)));
   }
 }

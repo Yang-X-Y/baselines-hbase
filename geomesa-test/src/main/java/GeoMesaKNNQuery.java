@@ -17,8 +17,7 @@ import org.locationtech.geomesa.utils.geotools.SimpleFeatureTypes;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import scala.Tuple2;
-import util.JsonUtil;
-
+import util.JSONUtil;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -82,7 +81,7 @@ public class GeoMesaKNNQuery {
 
 
     public static void main(String[] args) throws Exception {
-        JSONObject jsonConf = JsonUtil.readLocalJSONFile(args[0]);
+        JSONObject jsonConf = JSONUtil.readLocalJSONFile(args[0]);
         String recordFile = jsonConf.getString("recordFile");
         int numK = jsonConf.getIntValue("numK");
         double looseQueryRange = jsonConf.getDoubleValue("looseQueryRange");
