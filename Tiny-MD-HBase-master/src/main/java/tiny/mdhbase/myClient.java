@@ -88,19 +88,27 @@ public class myClient implements Closeable {
                     +"\t查询耗时：" + spendTime
                     +"\t查询范围 X："+range._1.toString()
                     +" Y:"+range._2.toString());
-            if (Iterables.size(points)==20){points.forEach(p->{System.out.println(p.toString());});}
           }
           long AVGTime = totalTime/queryRanges.size();
           System.out.println("AVGTime: "+AVGTime);
           break;
         case "knnQuery":
           List<Point> points = client.generateQueryPointsByRecords(pointRecordFile);
+          long totalTime1 = 0;
           for (Point queryPoint : points) {
+            long startTime = System.currentTimeMillis();
             Iterable<Point> knnResult = client.nearestNeighbor(queryPoint, numK);
-            for (Point p : knnResult) {
-              System.out.println(p.toString()+"\t distance:"+p.distanceFrom(queryPoint));
-            }
+            long endTime  = System.currentTimeMillis();
+            long spendTime = endTime - startTime;
+            totalTime1+=spendTime;
+            System.out.println("---------------------\n"
+                    +"查询点: "+queryPoint.toString()
+                    +"\t查询耗时：" + spendTime
+                    +"\tknn个数："+Iterables.size(knnResult));
+            knnResult.forEach(p-> System.out.println(p.toString()+"\t distance:"+p.distanceFrom(queryPoint)));
           }
+          long AVGTime1 = totalTime1/points.size();
+          System.out.println("AVGTime: "+AVGTime1);
           break;
       }
     } catch (Exception e) {
@@ -235,7 +243,7 @@ public class myClient implements Closeable {
 
     });
 
-    PriorityQueue<Bucket> queue = new PriorityQueue<Bucket>(Integer.MAX_VALUE,
+    PriorityQueue<Bucket> queue = new PriorityQueue<Bucket>(10000000,
         new Comparator<Bucket>() {
 
           @Override
@@ -264,7 +272,7 @@ public class myClient implements Closeable {
       }
 
       for (Bucket bucket = queue.poll(); bucket != null; bucket = queue.poll()) {
-        if (bucket.distanceFrom(point) > farthest) {
+        if (results.size() >= k && bucket.distanceFrom(point) > farthest) {
           return results;
         }
 
@@ -278,8 +286,8 @@ public class myClient implements Closeable {
           }
         }
         scannedBucketNames.add(bucket.toString());
-        int newOffset = (int) Math.ceil(Math.sqrt(point.distanceFrom(bucket
-            .farthestCornerFrom(point))));
+        int newOffset = (int) Math.ceil(point.distanceFrom(bucket
+            .farthestCornerFrom(point)));
         offset = Math.max(offset, newOffset);
       }
     } while (true);
