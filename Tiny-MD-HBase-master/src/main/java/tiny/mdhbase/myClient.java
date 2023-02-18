@@ -76,10 +76,22 @@ public class myClient implements Closeable {
           break;
         case "rangeQuery":
           List<Tuple2<Range, Range>> queryRanges = client.generateQueryBoxByRecords(rangeRecordFile);
+          long totalTime = 0;
           for (Tuple2<Range, Range> range : queryRanges) {
+            long startTime = System.currentTimeMillis();
             Iterable<Point> points = client.rangeQuery(range._1, range._2);
-            System.out.println(Iterables.size(points));
+            long endTime  = System.currentTimeMillis();
+            long spendTime = endTime - startTime;
+            totalTime+=spendTime;
+            System.out.println("---------------------\n"
+                    + "查询结果：" + Iterables.size(points)
+                    +"\t查询耗时：" + spendTime
+                    +"\t查询范围 X："+range._1.toString()
+                    +" Y:"+range._2.toString());
+            if (Iterables.size(points)==20){points.forEach(p->{System.out.println(p.toString());});}
           }
+          long AVGTime = totalTime/queryRanges.size();
+          System.out.println("AVGTime: "+AVGTime);
           break;
         case "knnQuery":
           List<Point> points = client.generateQueryPointsByRecords(pointRecordFile);

@@ -18,11 +18,8 @@ package tiny.mdhbase;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
 
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -113,13 +110,13 @@ public class Bucket {
    */
   public Collection<Point> scan(Range rx, Range ry) throws IOException {
     Scan scan = new Scan(startRow, stopRow);
-    Filter filter = new RangeFilter(rx, ry);
-    scan.setFilter(filter);
-    scan.setCaching(1000);
+//    Filter filter = new RangeFilter(rx, ry);
+//    scan.setFilter(filter);
+//    scan.setCaching(1000);
     ResultScanner scanner = dataTable.getScanner(scan);
-    List<Point> results = new LinkedList<Point>();
+    List<Point> results = new ArrayList<>();
     for (Result result : scanner) {
-      transformResultAndAddToList(result, results);
+      transformResultAndAddToList(result, results,rx, ry);
     }
     return results;
   }
@@ -133,6 +130,16 @@ public class Bucket {
     for (Entry<byte[], byte[]> entry : map.entrySet()) {
       Point p = toPoint(entry.getKey(), entry.getValue());
       found.add(p);
+    }
+  }
+
+  private void transformResultAndAddToList(Result result, List<Point> found, Range rx, Range ry) {
+    NavigableMap<byte[], byte[]> map = result.getFamilyMap(FAMILY);
+    for (Entry<byte[], byte[]> entry : map.entrySet()) {
+      Point p = toPoint(entry.getKey(), entry.getValue());
+      if (rx.include(p.x) && ry.include(p.y)) {
+        found.add(p);
+      }
     }
   }
 

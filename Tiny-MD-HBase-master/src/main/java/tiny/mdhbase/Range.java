@@ -62,4 +62,6 @@ public class Range {
       return max;
     }
   }
+
+  public String toString() { return "min: "+min+"; max: "+max; }
 }
