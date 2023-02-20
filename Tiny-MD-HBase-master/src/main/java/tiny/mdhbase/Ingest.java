@@ -59,20 +59,23 @@ public class Ingest implements Closeable {
     String tableName = jsonConf.getString("tableName");
     String inputFile = jsonConf.getString("inputFile");// 导入数据
     int splitThreshold = jsonConf.getIntValue("splitThreshold");// 桶分割阈值
-
+    boolean isUpdateIndex = jsonConf.getBoolean("isUpdateIndex");
     Ingest client = new Ingest(tableName, splitThreshold);
 
-    client.loadData(inputFile);
+    if (!isUpdateIndex) {System.out.println("isUpdateIndex:"+false);}
+
+    client.loadData(inputFile,isUpdateIndex);
 
     Closeables.closeQuietly(client);
   }
 
-  public void loadData(String inputFile) throws Exception {
+  public void loadData(String inputFile, boolean isUpdateIndex) throws Exception {
 
-    System.out.println("write data");
+    System.out.println("write data.........");
     long records = 0;
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
     String line;
+    Bucket bucket = new Bucket(index.getDataTable());
     while ((line = bufferedReader.readLine())!= null){
       String[] strings = line.split("@");
       long id = Long.parseLong(strings[0]);
@@ -82,9 +85,14 @@ public class Ingest implements Closeable {
       int integerLat = (int) ((coordinate.y+90.0) * PRECISION);
       Point p = new Point(id, integerLng, integerLat);
       byte[] row = Utils.bitwiseZip(p.x, p.y);
-      Bucket bucket = index.fetchBucket(row);
-      bucket.insertMain(row, p);
-      bucket.insertIndex(row, p);
+
+      if (isUpdateIndex) {
+        bucket = index.fetchBucket(row);
+        bucket.insertMain(row, p);
+        bucket.insertIndex(row, p);
+      } else {
+        bucket.insertMain(row, p);
+      }
       if (++records % 100000 == 0){
         System.out.println("当前导入点数：" + records);
         System.out.println("当前桶分割次数：" + index.getSplitTimes());

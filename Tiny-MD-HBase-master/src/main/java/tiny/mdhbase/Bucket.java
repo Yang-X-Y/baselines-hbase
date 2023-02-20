@@ -52,23 +52,28 @@ public class Bucket {
   public static byte[] FAMILY = "P".getBytes();
 
   private final HTable dataTable;
-  private final byte[] startRow;
-  private final byte[] stopRow;
-  private final Index index;
-  private final Range rangeX;
-  private final Range rangeY;
+  private byte[] startRow;
+  private byte[] stopRow;
+  private Index index;
+  private Range rangeX;
+  private Range rangeY;
 
   public Bucket(HTable dataTable, Range rx, Range ry, Index index) {
-    checkNotNull(dataTable);
-    checkNotNull(rx);
-    checkNotNull(ry);
-    checkNotNull(index);
+//    checkNotNull(dataTable);
+//    checkNotNull(rx);
+//    checkNotNull(ry);
+//    checkNotNull(index);
     this.dataTable = dataTable;
     this.rangeX = rx;
     this.rangeY = ry;
     this.startRow = Utils.bitwiseZip(rx.min, ry.min);
     this.stopRow = Bytes.incrementBytes(Utils.bitwiseZip(rx.max, ry.max), 1L);
     this.index = index;
+  }
+
+  public Bucket(HTable dataTable) {
+//    checkNotNull(dataTable);
+    this.dataTable = dataTable;
   }
 
   public void insertMain(byte[] row, Point p) throws IOException {
