@@ -84,9 +84,6 @@ public class Utils {
   }
 
   public static byte[] concat(byte[] b1, byte[] b2) {
-    checkNotNull(b1);
-    checkNotNull(b2);
-
     byte[] ret = new byte[b1.length + b2.length];
     System.arraycopy(b1, 0, ret, 0, b1.length);
     System.arraycopy(b2, 0, ret, b1.length, b2.length);
@@ -184,6 +181,6 @@ public class Utils {
   }
 
   public static void main(String[] args) {
-    System.out.println(Arrays.toString(Utils.bitwiseZip(360000000, 180000000)));
+    System.out.println(Arrays.toString(Utils.bitwiseZip(0, 0)));
   }
 }

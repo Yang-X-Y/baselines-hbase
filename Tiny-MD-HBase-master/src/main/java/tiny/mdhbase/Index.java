@@ -58,11 +58,11 @@ import tiny.mdhbase.util.Utils;
  * 
  */
 public class Index implements Closeable {
-  public static final byte[] FAMILY_INFO = "info".getBytes();
+  public static final byte[] FAMILY_INFO = Bytes.toBytes("info");
 
-  public static final byte[] COLUMN_PREFIX_LENGTH = "pl".getBytes();
+  public static final byte[] COLUMN_PREFIX_LENGTH = Bytes.toBytes("pl");
 
-  public static final byte[] COLUMN_BUCKET_SIZE = "bs".getBytes();
+  public static final byte[] COLUMN_BUCKET_SIZE = Bytes.toBytes("bs");
 
   private final int splitThreshold;
 
