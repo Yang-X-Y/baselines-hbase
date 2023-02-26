@@ -23,6 +23,7 @@ import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.core.store.api.DataStoreFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.api.Writer;
+import org.locationtech.geowave.core.store.query.constraints.QueryConstraints;
 import org.locationtech.geowave.datastore.hbase.config.HBaseRequiredOptions;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
@@ -107,35 +108,37 @@ public class Query {
     for (Geometry queryPolygon: queryPolygons){
       long startTime = System.currentTimeMillis();
       final VectorQueryBuilder bldr = VectorQueryBuilder.newBuilder();
-      try (CloseableIterator<SimpleFeature> iterator =
-                   dataStore.query(bldr
-                           .addTypeName(typeName)
-                           .indexName("SPATIAL_IDX")
-                           .addAuthorization("root")
-                           .constraints(bldr.constraintsFactory()
-                                   .spatialTemporalConstraints()
-                                   .spatialConstraints(queryPolygon)
-                                   .build())
-                           .build())) {
-        int cnt = 0;
-        long endTime = System.currentTimeMillis();
-        HashSet<String> featureSet = new HashSet<>();
-        System.out.println("queryPolygon: "+queryPolygon.toText());
-        while (iterator.hasNext()) {
-          final SimpleFeature sf = iterator.next();
-          featureSet.add(sf.getID());
-          if (cnt<10){
-            System.out.println(sf.getID()+": "+ sf.getDefaultGeometry());
-          }
-          cnt++;
-        }
+      QueryConstraints condition = bldr.constraintsFactory().spatialTemporalConstraints().spatialConstraints(queryPolygon).build();
+      CloseableIterator<SimpleFeature> iterator = dataStore.query(
+              bldr.addTypeName(typeName)
+                      .indexName("SPATIAL_IDX")
+                      .addAuthorization("huawei")
+                      .constraints(condition)
+                      .build());
+
+      int count = Iterators.size(iterator);
+      long endTime = System.currentTimeMillis();
+      long costTime = endTime - startTime;
+//      int cnt = 0;
+//      HashSet<String> featureSet = new HashSet<>();
+      System.out.println("queryPolygon: "+queryPolygon.toText());
+
+
+//      while (iterator.hasNext()) {
+//        final SimpleFeature sf = iterator.next();
+//        featureSet.add(sf.getID());
+//        if (cnt<10){
+//          System.out.println(sf.getID()+": "+ sf.getDefaultGeometry());
+//        }
+//        cnt++;
+//      }
 //        int count = Iterators.size(iterator);
 
-        long costTime = endTime - startTime;
-        totalTime+=costTime;
-        System.out.println("cost: "+costTime+" count: "+featureSet.size());
-        System.out.println("-------------------------\n");
-      }
+
+      totalTime+=costTime;
+      System.out.println("cost: "+costTime+" count: "+count);
+      System.out.println("-------------------------\n");
+
     }
     System.out.println("AVG_COST: "+totalTime/queryPolygons.size());
   }
