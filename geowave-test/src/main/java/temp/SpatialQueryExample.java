@@ -1,4 +1,4 @@
-/**
+package temp; /**
  * Copyright (c) 2013-2020 Contributors to the Eclipse Foundation
  *
  * <p> See the NOTICE file distributed with this work for additional information regarding copyright
@@ -21,7 +21,6 @@ import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.core.store.api.DataStoreFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.api.Writer;
-import org.locationtech.geowave.core.store.memory.MemoryRequiredOptions;
 import org.locationtech.geowave.datastore.hbase.config.HBaseRequiredOptions;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;

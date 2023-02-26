@@ -1,107 +1,118 @@
+/**
+ * Copyright (c) 2013-2020 Contributors to the Eclipse Foundation
+ *
+ * <p> See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. All rights reserved. This program and the accompanying materials are made available
+ * under the terms of the Apache License, Version 2.0 which accompanies this distribution and is
+ * available at http://www.apache.org/licenses/LICENSE-2.0.txt
+ */
+
+import com.alibaba.fastjson.JSONObject;
 import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.filter.identity.FeatureIdImpl;
+import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.locationtech.geowave.adapter.vector.FeatureDataAdapter;
 import org.locationtech.geowave.core.geotime.index.api.SpatialIndexBuilder;
+import org.locationtech.geowave.core.geotime.store.query.api.VectorQueryBuilder;
+import org.locationtech.geowave.core.geotime.util.GeometryUtils;
+import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.core.store.api.DataStoreFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.api.Writer;
 import org.locationtech.geowave.datastore.hbase.config.HBaseRequiredOptions;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.FactoryException;
-import java.util.ArrayList;
-import java.util.List;
+import util.JsonUtil;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+
+/**
+ * This class is intended to provide a few examples on running Geowave queries of different types:
+ * 1- Querying by polygon a set of points. 2- Filtering on attributes of features using CQL queries
+ * 3- Ingesting polygons, and running polygon intersect queries. You can check all points,
+ * geometries and query accuracy in a more visual manner @ http://geojson.io/
+ */
 public class Ingest {
 
-    public DataStore connectDatabase(){
-        HBaseRequiredOptions options = new HBaseRequiredOptions();
-        options.setZookeeper("huawei5:2181,huawei7:2181,huawei8:2181,huawei9:2181,huawei11:2181,huawei12:2181");
-        options.setGeoWaveNamespace("geowave");
-        DataStore myStore = DataStoreFactory.createDataStore(options);
-//        final DataStore geowaveDataStore =
-//                DataStoreFactory.createDataStore(new MemoryRequiredOptions());
-        return myStore;
-    }
+  private static DataStore dataStore;
 
-    public Index setIndex() throws FactoryException {
-        // Spatial Index
-        SpatialIndexBuilder spatialIndexBuilder = new SpatialIndexBuilder();
-        spatialIndexBuilder.setCrs("EPSG:4326");
-        Index spatialIndex = spatialIndexBuilder.createIndex();
-//        Index spatialIndex = new SpatialIndexBuilder().createIndex();
-        return spatialIndex;
-    }
+  public static void main(final String[] args) throws ParseException, CQLException, IOException {
+    JSONObject jsonConf = JsonUtil.readLocalJSONFile(args[0]);
+    String nameSpace = jsonConf.getString("nameSpace");
+    String inputFile = jsonConf.getString("inputFile");// 导入数据
+    String geomType = jsonConf.getString("geomType");// Point/Polygon/LineString
 
-    public List<SimpleFeature> buildSimpleFeature(){
+    HBaseRequiredOptions options = new HBaseRequiredOptions();
+    options.setZookeeper("huawei5:2181,huawei7:2181,huawei8:2181,huawei9:2181,huawei11:2181,huawei12:2181");
+//    options.setZookeeper("huawei5:2181");
+    options.setGeoWaveNamespace(nameSpace);
+    dataStore = DataStoreFactory.createDataStore(options);
+    ingestGeometry(inputFile,geomType);
+  }
 
-        List<SimpleFeature> features = new ArrayList<>();
-        SimpleFeatureTypeBuilder pointTypeBuilder = new SimpleFeatureTypeBuilder();
-        AttributeTypeBuilder attributeBuilder = new AttributeTypeBuilder();
-        pointTypeBuilder.setName("TestPointType");
-        pointTypeBuilder.add(attributeBuilder.binding(Point.class).nillable(false).buildDescriptor("the_geom"));
-        SimpleFeatureType pointType = pointTypeBuilder.buildFeatureType();
-        // Create a feature builder
-        SimpleFeatureBuilder pointFeatureBuilder = new SimpleFeatureBuilder(pointType);
+  private static void ingestGeometry(String inputFile, String geomType) {
+    // First, we'll build our first kind of SimpleFeature, which we'll call
+    // "basic-feature"
+    // We need the type builder to build the feature type
+    final SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+    // AttributeTypeBuilder for the attributes of the SimpleFeature
+    final AttributeTypeBuilder attrBuilder = new AttributeTypeBuilder();
+    // Here we're setting the SimpleFeature name. Later on, we'll be able to
+    // query GW just by this particular feature.
+    sftBuilder.setName(geomType);
+    // Add the attributes to the feature
+    // Add the geometry attribute, which is mandatory for GeoWave to be able
+    // to construct an index out of the SimpleFeature
+    sftBuilder.add(attrBuilder.binding(Geometry.class).nillable(false).buildDescriptor("geometry"));
 
-        GeometryFactory factory = new GeometryFactory();
-        pointFeatureBuilder.set("the_geom", factory.createPoint(new Coordinate(1, 1)));
-        SimpleFeature feature1 = pointFeatureBuilder.buildFeature("feature1");
-        features.add(feature1);
-        System.out.println("feature1:"+feature1.toString());
 
-        pointFeatureBuilder.set("the_geom", factory.createPoint(new Coordinate(5, 5)));
-        SimpleFeature feature2 = pointFeatureBuilder.buildFeature("feature2");
-        features.add(feature2);
-        System.out.println("feature2:"+feature2.toString());
+    // Create the SimpleFeatureType
+    final SimpleFeatureType sfType = sftBuilder.buildFeatureType();
+    // We need the adapter for all our operations with GeoWave
+    final FeatureDataAdapter sfAdapter = new FeatureDataAdapter(sfType);
 
-        pointFeatureBuilder.set("the_geom", factory.createPoint(new Coordinate(-5, -5)));
-        SimpleFeature feature3 = pointFeatureBuilder.buildFeature("feature3");
-        features.add(feature3);
-        System.out.println("feature3:"+feature3.toString());
+    // Now we build features.
 
-        return features;
+    Index index = new SpatialIndexBuilder().createIndex();
+    dataStore.addType(sfAdapter, index);
 
-    }
+    int records = 0;
+    try {
+      WKTReader wktReader = new WKTReader();
+      Writer<SimpleFeature> indexWriter = dataStore.createWriter(sfAdapter.getTypeName());
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
+      String line;
+      while ((line = bufferedReader.readLine())!= null){
+        String[] strings = line.split("@");
+        String id = strings[0];
+        String geomWKT = strings[1];
+        final SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(sfType);
+        sfBuilder.set("geometry", wktReader.read(geomWKT));
+        // When calling buildFeature, we need to pass an unique id for that
+        // feature, or it will be overwritten.
+        SimpleFeature tempSF = sfBuilder.buildFeature(id);
+        indexWriter.write(tempSF);
 
-    public void write(DataStore myStore,Index spatialIndex,List<SimpleFeature> features){
-
-        SimpleFeatureType pointType = features.get(0).getFeatureType();
-
-        // Create an adapter for point type
-        FeatureDataAdapter pointTypeAdapter = new FeatureDataAdapter(pointType);
-
-        // Add the point type to the data store in the spatial index
-        myStore.addType(pointTypeAdapter, spatialIndex);
-        System.out.println("success:myStore.addType");
-
-        Writer<SimpleFeature> writer = myStore.createWriter(pointTypeAdapter.getTypeName());
-        System.out.println("success:createWriter");
-        for (SimpleFeature feature: features){
-
-            writer.write(feature);
+        if (++records % 1000000 == 0){
+          System.out.println("目前导入点数：" + records);
         }
-        writer.close();
+      }
+      indexWriter.close();
+      System.out.println("导入总点数：" + records);
+    }catch (IOException | ParseException e){
+      System.out.println(e.getMessage());
     }
 
-    public static void main(String[] args) throws FactoryException {
-        // Create a point feature type
-        Ingest ingest = new Ingest();
-
-        DataStore myStore = ingest.connectDatabase();
-        System.out.println("success:connectDatabase");
-        Index spatialIndex = ingest.setIndex();
-        System.out.println("success:setIndex");
-        myStore.addIndex(spatialIndex);
-        System.out.println("success:addIndex");
-        List<SimpleFeature> features = ingest.buildSimpleFeature();
-        System.out.println("success:buildSimpleFeature");
-        ingest.write(myStore,spatialIndex,features);
-        System.out.println("success:write");
-    }
+  }
 }
