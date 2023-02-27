@@ -104,11 +104,17 @@ public class Query {
   /** This query will use a specific Bounding Box, and will find only 1 point. */
   private static void rangeQuery(List<Polygon> queryPolygons, String typeName) {
 
-    long totalTime=0;
+    long totalConditionTime=0;
+    long totalQueryTime=0;
+    long totalCountTime=0;
+
+    boolean firstQuery = true;
     for (Geometry queryPolygon: queryPolygons){
-      long startTime = System.currentTimeMillis();
+      long startConditionTime = System.currentTimeMillis();
       final VectorQueryBuilder bldr = VectorQueryBuilder.newBuilder();
       QueryConstraints condition = bldr.constraintsFactory().spatialTemporalConstraints().spatialConstraints(queryPolygon).build();
+      long conditionTime = System.currentTimeMillis()-startConditionTime;
+      long startQueryTime = System.currentTimeMillis();
       CloseableIterator<SimpleFeature> iterator = dataStore.query(
               bldr.addTypeName(typeName)
                       .indexName("SPATIAL_IDX")
@@ -116,9 +122,21 @@ public class Query {
                       .constraints(condition)
                       .build());
 
+      long queryTime = System.currentTimeMillis() - startQueryTime;
+
+      long startCountTime = System.currentTimeMillis();
       int count = Iterators.size(iterator);
-      long endTime = System.currentTimeMillis();
-      long costTime = endTime - startTime;
+      long countTime = System.currentTimeMillis() - startCountTime;
+
+      if (!firstQuery){
+        totalConditionTime+=conditionTime;
+        totalQueryTime+=queryTime;
+        totalCountTime+=countTime;
+      } else {
+        firstQuery=false;
+      }
+
+
 //      int cnt = 0;
 //      HashSet<String> featureSet = new HashSet<>();
       System.out.println("queryPolygon: "+queryPolygon.toText());
@@ -133,13 +151,11 @@ public class Query {
 //        cnt++;
 //      }
 //        int count = Iterators.size(iterator);
-
-
-      totalTime+=costTime;
-      System.out.println("cost: "+costTime+" count: "+count);
+      System.out.println("conditionTime: "+conditionTime+" queryTime: "+queryTime+" countTime: "+countTime+" count: "+count);
       System.out.println("-------------------------\n");
-
     }
-    System.out.println("AVG_COST: "+totalTime/queryPolygons.size());
+    System.out.println("AVGConditionTime: "+totalConditionTime/(queryPolygons.size()-1));
+    System.out.println("AVGQueryTime: "+totalQueryTime/(queryPolygons.size()-1));
+    System.out.println("AVGCountTime: "+totalCountTime/(queryPolygons.size()-1));
   }
 }
