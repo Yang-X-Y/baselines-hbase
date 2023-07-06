@@ -40,6 +40,7 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
  */
 public class myClient implements Closeable {
 
+  private static int bucketSize=0;
   private final Index index;
   private final WKTReader wktReader;
   private final int PRECISION = 1000000;
@@ -95,7 +96,9 @@ public class myClient implements Closeable {
         case "knnQuery":
           List<Point> points = client.generateQueryPointsByRecords(pointRecordFile);
           long totalTime1 = 0;
+          int AVGBucketSize = 0;
           for (Point queryPoint : points) {
+            bucketSize=0;
             long startTime = System.currentTimeMillis();
             Iterable<Point> knnResult = client.nearestNeighbor(queryPoint, numK);
             long endTime  = System.currentTimeMillis();
@@ -106,9 +109,11 @@ public class myClient implements Closeable {
                     +"\t查询耗时：" + spendTime
                     +"\tknn个数："+Iterables.size(knnResult));
             knnResult.forEach(p-> System.out.println(p.toString()+"\t distance:"+p.distanceFrom(queryPoint)));
+            AVGBucketSize+=bucketSize;
           }
           long AVGTime1 = totalTime1/points.size();
           System.out.println("AVGTime: "+AVGTime1);
+          System.out.println("AVGBucketSize: "+(AVGBucketSize/points.size()));
           break;
       }
     } catch (Exception e) {
@@ -275,7 +280,7 @@ public class myClient implements Closeable {
         if (results.size() >= k && bucket.distanceFrom(point) > farthest) {
           return results;
         }
-
+        bucketSize+=1;
         for (Point p : bucket.scan()) {
           if (results.size() < k) {
             results.add(p); // results.size() is at most k.

@@ -108,7 +108,6 @@ public class Query {
     long totalQueryTime=0;
     long totalCountTime=0;
 
-    boolean firstQuery = true;
     for (Geometry queryPolygon: queryPolygons){
       long startConditionTime = System.currentTimeMillis();
       final VectorQueryBuilder bldr = VectorQueryBuilder.newBuilder();
@@ -128,13 +127,9 @@ public class Query {
       int count = Iterators.size(iterator);
       long countTime = System.currentTimeMillis() - startCountTime;
 
-      if (!firstQuery){
-        totalConditionTime+=conditionTime;
-        totalQueryTime+=queryTime;
-        totalCountTime+=countTime;
-      } else {
-        firstQuery=false;
-      }
+      totalConditionTime+=conditionTime;
+      totalQueryTime+=queryTime;
+      totalCountTime+=countTime;
 
 
 //      int cnt = 0;
@@ -154,8 +149,8 @@ public class Query {
       System.out.println("conditionTime: "+conditionTime+" queryTime: "+queryTime+" countTime: "+countTime+" count: "+count);
       System.out.println("-------------------------\n");
     }
-    System.out.println("AVGConditionTime: "+totalConditionTime/(queryPolygons.size()-1));
-    System.out.println("AVGQueryTime: "+totalQueryTime/(queryPolygons.size()-1));
-    System.out.println("AVGCountTime: "+totalCountTime/(queryPolygons.size()-1));
+    System.out.println("AVGConditionTime: "+totalConditionTime/(queryPolygons.size()));
+    System.out.println("AVGQueryTime: "+totalQueryTime/(queryPolygons.size()));
+    System.out.println("AVGCountTime: "+totalCountTime/(queryPolygons.size()));
   }
 }
