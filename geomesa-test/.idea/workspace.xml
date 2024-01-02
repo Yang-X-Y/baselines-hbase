@@ -5,10 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8d2f8536-6da2-4de3-94fa-0c9840465fcb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/GeoMesaKNNQueryNew.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Tiny-MD-HBase-master/src/main/java/tiny/mdhbase/myClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Tiny-MD-HBase-master/src/main/java/tiny/mdhbase/myClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../geowave-test/geowave-test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/geomesa-test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/geomesa-test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_annotations_2_9_8.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_databind_2_9_8.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_geotools_gt_api_20_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_geotools_gt_data_20_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_geotools_gt_process_20_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_locationtech_geomesa_geomesa_process_vector_2_11_2_3_3.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../geowave-test/src/main/java/Query.java" beforeDir="false" afterPath="$PROJECT_DIR$/../geowave-test/src/main/java/Query.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +167,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../geomesaAll/geomesa-process-vector_2.11-2.3.3" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Global Libraries" />
@@ -194,13 +201,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="class" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -307,6 +316,9 @@
       <workItem from="1686219077241" duration="874000" />
       <workItem from="1686230672654" duration="617000" />
       <workItem from="1688629632875" duration="874000" />
+      <workItem from="1688645478498" duration="18000" />
+      <workItem from="1688646175903" duration="976000" />
+      <workItem from="1688647181616" duration="1399000" />
     </task>
     <servers />
   </component>
