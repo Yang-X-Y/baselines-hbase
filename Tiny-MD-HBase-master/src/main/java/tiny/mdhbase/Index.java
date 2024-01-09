@@ -88,7 +88,7 @@ public class Index implements Closeable {
     }
     dataTable = new HTable(config, tableName);
 
-    String indexTableStr = tableNameStr + "_index";
+    String indexTableStr = tableNameStr + "BS"+splitThreshold+"_index";
     TableName indexTableName = TableName.valueOf(indexTableStr);
     if (!admin.tableExists(indexTableName)) {
       HTableDescriptor tdesc = new HTableDescriptor(indexTableName);
